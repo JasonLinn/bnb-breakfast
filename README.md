@@ -36,7 +36,8 @@
 ### 整合服務
 - **Unsplash API**: 高品質食物攝影圖片
 - **Next.js Image**: 自動圖片最佳化和延遲載入
-- **RESTful API**: 自建 API 路由處理訂單
+- **Nodemailer**: 可靠的郵件發送服務
+- **Gmail SMTP**: 企業級郵件傳輸協定
 
 ### 開發工具
 - **Turbopack**: 快速的 bundler 提升開發體驗
@@ -58,7 +59,37 @@
 
 ## 安裝和執行
 
-1. 安裝相依套件：
+### 1. 基本安裝
+```bash
+# 安裝相依套件
+npm install
+
+# 複製環境變數範例檔案
+cp .env.example .env.local
+```
+
+### 2. 郵件服務設定
+編輯 `.env.local` 檔案，設定 Gmail SMTP：
+
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=你的Gmail地址@gmail.com
+SMTP_PASS=你的應用程式密碼
+SMTP_FROM="ToDo早午餐 利澤店" <你的Gmail地址@gmail.com>
+SMTP_TO=cheng11220@gmail.com
+```
+
+**📧 詳細郵件設定請參考 [MAIL_SETUP.md](./MAIL_SETUP.md)**
+
+### 3. 啟動專案
+```bash
+# 啟動開發伺服器
+npm run dev
+
+# 測試郵件功能
+# 訪問 http://localhost:3000/test-email
+```
 ```bash
 npm install
 ```

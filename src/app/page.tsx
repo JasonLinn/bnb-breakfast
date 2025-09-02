@@ -218,13 +218,15 @@ export default function Home() {
       });
 
       if (response.ok) {
-        alert(`訂單已送出並通知店家！\n\n送餐時間: ${deliveryTime}\n\n訂單內容:\n${orderDetails}\n\n總計: ${getTotalItems()}份`);
+        const responseData = await response.json();
+        alert(`✅ 訂單已送出並通知店家！\n\n送餐時間: ${deliveryTime}\n\n訂單內容:\n${orderDetails}\n\n總計: ${getTotalItems()}份\n\n${responseData.messageId ? `郵件 ID: ${responseData.messageId}` : ''}`);
         // 清空購物車
         setCart([]);
         setDeliveryTime('');
         setShowCart(false);
       } else {
-        throw new Error('發送失敗');
+        const errorData = await response.json();
+        throw new Error(errorData.message || '發送失敗');
       }
     } catch (error) {
       // 備用方案：顯示訂單資訊
@@ -232,7 +234,8 @@ export default function Home() {
       const orderDetails = Object.entries(summary)
         .map(([item, qty]) => `${item}: ${qty}份`)
         .join('\n');
-      alert(`訂單已記錄！(郵件功能開發中)\n\n送餐時間: ${deliveryTime}\n\n訂單內容:\n${orderDetails}\n\n總計: ${getTotalItems()}份`);
+      const errorMessage = error instanceof Error ? error.message : '未知錯誤';
+      alert(`⚠️ 郵件發送失敗，但訂單已記錄\n\n錯誤: ${errorMessage}\n\n送餐時間: ${deliveryTime}\n\n訂單內容:\n${orderDetails}\n\n總計: ${getTotalItems()}份\n\n請手動聯繫店家確認訂單`);
       // 清空購物車
       setCart([]);
       setDeliveryTime('');

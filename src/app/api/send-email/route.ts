@@ -1,43 +1,72 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { sendOrderEmail, testEmailConnection } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
     const orderData = await request.json();
     
-    // 建立電子郵件內容
-    const emailContent = `
-新的早餐訂單 - ToDo早午餐 利澤店
+    // 驗證必要欄位
+    if (!orderData.deliveryTime || !orderData.items || orderData.items.length === 0) {
+      return NextResponse.json(
+        { success: false, message: '訂單資料不完整' },
+        { status: 400 }
+      );
+    }
 
-訂單時間: ${orderData.timestamp}
-送餐時間: ${orderData.deliveryTime}
-
-訂單內容:
-${orderData.orderDetails}
-
-總計: ${orderData.totalItems}份
-
-詳細品項:
-${orderData.items.map((item: any) => `${item.name}: ${item.quantity}份`).join('\n')}
-    `;
-
-    // 這裡可以整合 EmailJS, SendGrid, 或其他郵件服務
-    // 目前先記錄到 console 和回傳成功
-    console.log('新訂單:', emailContent);
+    // 發送郵件
+    const emailResult = await sendOrderEmail(orderData);
     
-    // TODO: 實際發送郵件到 cheng11220@gmail.com
-    // 可以使用 nodemailer, SendGrid, EmailJS 等服務
+    console.log('訂單處理成功:', {
+      timestamp: orderData.timestamp,
+      deliveryTime: orderData.deliveryTime,
+      totalItems: orderData.totalItems,
+      messageId: emailResult.messageId
+    });
     
     return NextResponse.json({ 
       success: true, 
-      message: '訂單已接收',
-      orderData 
+      message: '訂單已成功發送',
+      messageId: emailResult.messageId
     });
     
   } catch (error) {
-    console.error('郵件發送錯誤:', error);
+    console.error('訂單處理錯誤:', error);
+    
+    // 根據錯誤類型提供不同的回應
+    const errorMessage = error instanceof Error ? error.message : '未知錯誤';
+    
     return NextResponse.json(
-      { success: false, message: '訂單處理失敗' },
+      { 
+        success: false, 
+        message: '訂單發送失敗', 
+        error: errorMessage 
+      },
       { status: 500 }
     );
+  }
+}
+
+// 測試郵件配置的 GET 端點
+export async function GET() {
+  try {
+    const isConnected = await testEmailConnection();
+    
+    if (isConnected) {
+      return NextResponse.json({ 
+        success: true, 
+        message: 'SMTP 配置正常' 
+      });
+    } else {
+      return NextResponse.json({ 
+        success: false, 
+        message: 'SMTP 連線失敗' 
+      }, { status: 500 });
+    }
+  } catch (error) {
+    return NextResponse.json({ 
+      success: false, 
+      message: 'SMTP 測試失敗',
+      error: error instanceof Error ? error.message : '未知錯誤'
+    }, { status: 500 });
   }
 }
