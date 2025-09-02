@@ -332,7 +332,7 @@ export default function Home() {
 
           {/* 購物車側邊欄 */}
           <div className="lg:col-span-1">
-            <div className={`bg-white rounded-xl shadow-lg p-6 sticky top-24 ${showCart ? 'block' : 'hidden lg:block'}`}>
+            <div className={`bg-white rounded-xl shadow-lg p-6 sticky top-24 ${showCart ? 'block' : 'hidden'}`}>
               <h2 className="text-xl font-bold text-gray-800 mb-4">點餐清單</h2>
               
               {/* 送餐時間選擇 */}
