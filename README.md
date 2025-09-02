@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ToDo早午餐訂單系統
 
-## Getting Started
+這是一個基於 Next.js 和 Tailwind CSS 建立的早餐訂單網頁系統，為 ToDo早午餐利澤店設計。
 
-First, run the development server:
+## 功能特色
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- 📱 響應式設計，支援桌面和手機瀏覽
+- 🛒 購物車功能，可添加、修改和刪除商品
+- 🍽️ 完整的早餐菜單展示
+- ☕ 飲品選擇（冰/熱/去冰）
+- 💰 價格計算和訂單總計
+- 🎨 現代化的 UI 設計
+
+## 技術架構
+
+- **前端框架**: Next.js 15.5.2 (App Router)
+- **樣式**: Tailwind CSS
+- **語言**: TypeScript
+- **狀態管理**: React Hooks (useState)
+
+## 專案結構
+
+```
+├── src/
+│   └── app/
+│       ├── page.tsx          # 主頁面元件
+│       ├── layout.tsx        # 根佈局
+│       └── globals.css       # 全域樣式
+├── public/                   # 靜態資源
+├── .github/                  # GitHub 設定
+└── package.json             # 專案相依性
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 安裝和執行
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. 安裝相依套件：
+```bash
+npm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. 啟動開發伺服器：
+```bash
+npm run dev
+```
 
-## Learn More
+3. 在瀏覽器中開啟 [http://localhost:3000](http://localhost:3000)
 
-To learn more about Next.js, take a look at the following resources:
+## 建構專案
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 菜單項目
 
-## Deploy on Vercel
+### 主餐
+- 早安拼盤
+- 豬排起司蛋美式漢堡/鮮奶吐司
+- 夏威夷嫩雞美式漢堡/鮮奶吐司
+- 火腿歐姆蛋美式漢堡/鮮奶吐司
+- 洋蔥燒肉蛋餅
+- 蔬活蛋素拼盤(素食)
+- 兒童餐
+- 豬排蛋鐵板麵(黑胡椒)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 搭配飲品
+- 錫蘭紅茶（冰/熱/去冰）
+- 錫蘭奶茶（冰/熱/去冰）
+- 非基改豆乳（冰/熱/去冰）
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 圖片位置
+
+專案中已預留圖片位置：
+- 店家 Logo 位置（Header 區域）
+- 主餐商品圖片位置（每個菜單項目）
+- 飲品圖片位置（飲品選單）
+
+您可以將實際的商品圖片放在 `public/` 目錄中，然後在程式碼中更新圖片路徑。
+
+## 聯絡資訊
+
+**ToDo早午餐 利澤店**
+- 地址：五結鄉親河路一段151號(龍之園餐廳正對面)
+- 電話：03-9508077
+
+## 授權
+
+此專案僅供 ToDo早午餐利澤店使用。
