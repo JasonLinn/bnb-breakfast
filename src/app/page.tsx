@@ -8,6 +8,7 @@ interface MenuItem {
   name: string;
   price: number;
   description?: string;
+  image?: string;
 }
 
 interface DrinkItem {
@@ -16,6 +17,7 @@ interface DrinkItem {
   icePrice: number;
   hotPrice: number;
   noIcePrice?: number;
+  image?: string;
 }
 
 interface OrderItem {
@@ -32,21 +34,90 @@ export default function Home() {
   const [deliveryTime, setDeliveryTime] = useState<string>('');
 
   const menuItems: MenuItem[] = [
-    { id: 1, name: '早安拼盤', price: 0, description: '鮮奶吐司+起士火腿+炒蛋+生菜沙拉+地瓜' },
-    { id: 2, name: '豬排起司蛋美式漢堡/鮮奶吐司', price: 0 },
-    { id: 3, name: '夏威夷嫩雞美式漢堡/鮮奶吐司', price: 0 },
-    { id: 4, name: '火腿歐姆蛋美式漢堡/鮮奶吐司', price: 0 },
-    { id: 5, name: '洋蔥燒肉蛋餅', price: 0 },
-    { id: 6, name: '蔬活蛋素拼盤(素食)', price: 0, description: '雜蛋沙拉四層總匯三明治+生菜沙拉+地瓜' },
-    { id: 7, name: '兒童餐', price: 0, description: '抹醬吐司:花生/阿華田/草莓/奶酥/奶油+炒蛋+玉米+薯餅+鮮奶茶' },
-    { id: 8, name: '豬排蛋鐵板麵(黑胡椒)', price: 0 },
-    { id: 9, name: '蘑菇', price: 0 }
+    { 
+      id: 1, 
+      name: '早安拼盤', 
+      price: 0, 
+      description: '鮮奶吐司+起士火腿+炒蛋+生菜沙拉+地瓜',
+      image: 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?ixlib=rb-4.0.3&w=400&h=300&fit=crop'
+    },
+    { 
+      id: 2, 
+      name: '豬排起司蛋美式漢堡/鮮奶吐司', 
+      price: 0,
+      image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&w=400&h=300&fit=crop'
+    },
+    { 
+      id: 3, 
+      name: '夏威夷嫩雞美式漢堡/鮮奶吐司', 
+      price: 0,
+      image: 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?ixlib=rb-4.0.3&w=400&h=300&fit=crop'
+    },
+    { 
+      id: 4, 
+      name: '火腿歐姆蛋美式漢堡/鮮奶吐司', 
+      price: 0,
+      image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?ixlib=rb-4.0.3&w=400&h=300&fit=crop'
+    },
+    { 
+      id: 5, 
+      name: '洋蔥燒肉蛋餅', 
+      price: 0,
+      image: 'https://images.unsplash.com/photo-1506084868230-bb9d95c24759?ixlib=rb-4.0.3&w=400&h=300&fit=crop'
+    },
+    { 
+      id: 6, 
+      name: '蔬活蛋素拼盤(素食)', 
+      price: 0, 
+      description: '雜蛋沙拉四層總匯三明治+生菜沙拉+地瓜',
+      image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&w=400&h=300&fit=crop'
+    },
+    { 
+      id: 7, 
+      name: '兒童餐', 
+      price: 0, 
+      description: '抹醬吐司:花生/阿華田/草莓/奶酥/奶油+炒蛋+玉米+薯餅+鮮奶茶',
+      image: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?ixlib=rb-4.0.3&w=400&h=300&fit=crop'
+    },
+    { 
+      id: 8, 
+      name: '豬排蛋鐵板麵(黑胡椒)', 
+      price: 0,
+      image: 'https://images.unsplash.com/photo-1555126634-323283e090fa?ixlib=rb-4.0.3&w=400&h=300&fit=crop'
+    },
+    { 
+      id: 9, 
+      name: '蘑菇', 
+      price: 0,
+      image: 'https://images.unsplash.com/photo-1518779578993-ec3579fee39f?ixlib=rb-4.0.3&w=400&h=300&fit=crop'
+    }
   ];
 
   const drinks: DrinkItem[] = [
-    { id: 1, name: '錫蘭紅茶', icePrice: 0, hotPrice: 0, noIcePrice: 0 },
-    { id: 2, name: '錫蘭奶茶', icePrice: 0, hotPrice: 0, noIcePrice: 0 },
-    { id: 3, name: '非基改豆乳', icePrice: 0, hotPrice: 0, noIcePrice: 0 }
+    { 
+      id: 1, 
+      name: '錫蘭紅茶', 
+      icePrice: 0, 
+      hotPrice: 0, 
+      noIcePrice: 0,
+      image: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?ixlib=rb-4.0.3&w=200&h=200&fit=crop'
+    },
+    { 
+      id: 2, 
+      name: '錫蘭奶茶', 
+      icePrice: 0, 
+      hotPrice: 0, 
+      noIcePrice: 0,
+      image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&w=200&h=200&fit=crop'
+    },
+    { 
+      id: 3, 
+      name: '非基改豆乳', 
+      icePrice: 0, 
+      hotPrice: 0, 
+      noIcePrice: 0,
+      image: 'https://images.unsplash.com/photo-1544145945-f90425340c7e?ixlib=rb-4.0.3&w=200&h=200&fit=crop'
+    }
   ];
 
   const addToCart = (item: MenuItem | DrinkItem, type?: 'ice' | 'hot' | 'no-ice') => {
@@ -161,9 +232,21 @@ export default function Home() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {menuItems.map((item) => (
                   <div key={item.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                    {/* 預留圖片位置 */}
-                    <div className="w-full h-40 bg-gray-200 rounded-lg mb-3 flex items-center justify-center">
-                      <span className="text-gray-500">圖片位置</span>
+                    {/* 餐點圖片 */}
+                    <div className="w-full h-40 bg-gray-200 rounded-lg mb-3 overflow-hidden">
+                      {item.image ? (
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          width={400}
+                          height={160}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="text-gray-500">圖片位置</span>
+                        </div>
+                      )}
                     </div>
                     <h3 className="font-semibold text-lg text-gray-800">{item.name}</h3>
                     {item.description && (
@@ -193,10 +276,22 @@ export default function Home() {
                   <div key={drink.id} className="border rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
-                        {/* 預留飲品圖片位置 */}
+                        {/* 飲品圖片 */}
                         <div className="flex items-center space-x-4">
-                          <div className="w-20 h-20 bg-blue-200 rounded-lg flex items-center justify-center">
-                            <span className="text-blue-600">🥤</span>
+                          <div className="w-20 h-20 bg-blue-200 rounded-lg overflow-hidden">
+                            {drink.image ? (
+                              <Image
+                                src={drink.image}
+                                alt={drink.name}
+                                width={80}
+                                height={80}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <span className="text-blue-600">🥤</span>
+                              </div>
+                            )}
                           </div>
                           <div>
                             <h3 className="font-semibold text-lg text-gray-800">{drink.name}</h3>
