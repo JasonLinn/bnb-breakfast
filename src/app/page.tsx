@@ -573,7 +573,7 @@ export default function Home() {
                 <textarea
                   value={orderNote}
                   onChange={(e) => setOrderNote(e.target.value)}
-                  placeholder="特殊需求、過敏提醒等..."
+                  placeholder="如有特殊需求請於此說明"
                   className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
                   rows={3}
                   maxLength={200}
@@ -762,7 +762,7 @@ export default function Home() {
                 <textarea
                   value={orderNote}
                   onChange={(e) => setOrderNote(e.target.value)}
-                  placeholder="特殊需求、過敏提醒等..."
+                  placeholder="如有特殊需求請於此說明"
                   className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
                   rows={3}
                   maxLength={200}
