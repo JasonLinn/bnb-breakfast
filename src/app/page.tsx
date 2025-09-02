@@ -225,9 +225,43 @@ export default function Home() {
     return cart.reduce((total, item) => total + item.quantity, 0);
   };
 
+  const getFoodItems = () => {
+    return cart.filter(item => !item.type); // 沒有 type 的是餐點
+  };
+
+  const getDrinkItems = () => {
+    return cart.filter(item => item.type); // 有 type 的是飲料
+  };
+
+  const getFoodTotal = () => {
+    return getFoodItems().reduce((total, item) => total + item.quantity, 0);
+  };
+
+  const getDrinkTotal = () => {
+    return getDrinkItems().reduce((total, item) => total + item.quantity, 0);
+  };
+
   const getOrderSummary = () => {
     const summary: { [key: string]: number } = {};
     cart.forEach(item => {
+      const itemName = item.name;
+      summary[itemName] = (summary[itemName] || 0) + item.quantity;
+    });
+    return summary;
+  };
+
+  const getFoodSummary = () => {
+    const summary: { [key: string]: number } = {};
+    getFoodItems().forEach(item => {
+      const itemName = item.name;
+      summary[itemName] = (summary[itemName] || 0) + item.quantity;
+    });
+    return summary;
+  };
+
+  const getDrinkSummary = () => {
+    const summary: { [key: string]: number } = {};
+    getDrinkItems().forEach(item => {
       const itemName = item.name;
       summary[itemName] = (summary[itemName] || 0) + item.quantity;
     });
@@ -587,18 +621,58 @@ export default function Home() {
                   {/* 訂單統計 */}
                   <div className="border-t pt-4 mb-4">
                     <h3 className="text-lg font-bold text-gray-800 mb-3">訂單統計</h3>
-                    <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
-                      {Object.entries(getOrderSummary()).map(([itemName, quantity]) => (
-                        <div key={itemName} className="flex justify-between text-sm">
-                          <span className="text-gray-700">{itemName}</span>
-                          <span className="font-semibold text-gray-900">{quantity} 份</span>
+                    
+                    {/* 餐點統計 */}
+                    {getFoodTotal() > 0 && (
+                      <div className="mb-4">
+                        <h4 className="text-md font-semibold text-gray-700 mb-2">🍽️ 餐點</h4>
+                        <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
+                          {Object.entries(getFoodSummary()).map(([itemName, quantity]) => (
+                            <div key={itemName} className="flex justify-between text-sm">
+                              <span className="text-gray-700">{itemName}</span>
+                              <span className="font-semibold text-gray-900">{quantity} 份</span>
+                            </div>
+                          ))}
+                          <div className="border-t pt-2 mt-2">
+                            <div className="flex justify-between font-bold text-sm">
+                              <span>餐點小計：</span>
+                              <span className="text-orange-600">{getFoodTotal()} 份</span>
+                            </div>
+                          </div>
                         </div>
-                      ))}
-                      <div className="border-t pt-2 mt-2">
-                        <div className="flex justify-between font-bold">
-                          <span>總計：</span>
-                          <span className="text-orange-600">{getTotalItems()} 份</span>
+                      </div>
+                    )}
+
+                    {/* 飲料統計 */}
+                    {getDrinkTotal() > 0 && (
+                      <div className="mb-4">
+                        <h4 className="text-md font-semibold text-gray-700 mb-2">🥤 飲料</h4>
+                        <div className="space-y-2 bg-blue-50 p-3 rounded-lg">
+                          {Object.entries(getDrinkSummary()).map(([itemName, quantity]) => (
+                            <div key={itemName} className="flex justify-between text-sm">
+                              <span className="text-gray-700">{itemName}</span>
+                              <span className="font-semibold text-gray-900">{quantity} 杯</span>
+                            </div>
+                          ))}
+                          <div className="border-t pt-2 mt-2">
+                            <div className="flex justify-between font-bold text-sm">
+                              <span>飲料小計：</span>
+                              <span className="text-blue-600">{getDrinkTotal()} 杯</span>
+                            </div>
+                          </div>
                         </div>
+                      </div>
+                    )}
+
+                    {/* 總計 */}
+                    <div className="bg-yellow-50 p-3 rounded-lg">
+                      <div className="flex justify-between font-bold">
+                        <span>總計：</span>
+                        <span className="text-red-600">
+                          {getFoodTotal() > 0 && `${getFoodTotal()} 份餐點`}
+                          {getFoodTotal() > 0 && getDrinkTotal() > 0 && ' + '}
+                          {getDrinkTotal() > 0 && `${getDrinkTotal()} 杯飲料`}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -736,18 +810,58 @@ export default function Home() {
                   {/* 訂單統計 */}
                   <div className="border-t pt-4 mb-4">
                     <h3 className="text-lg font-bold text-gray-800 mb-3">訂單統計</h3>
-                    <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
-                      {Object.entries(getOrderSummary()).map(([itemName, quantity]) => (
-                        <div key={itemName} className="flex justify-between text-sm">
-                          <span className="text-gray-700">{itemName}</span>
-                          <span className="font-semibold text-gray-900">{quantity} 份</span>
+                    
+                    {/* 餐點統計 */}
+                    {getFoodTotal() > 0 && (
+                      <div className="mb-4">
+                        <h4 className="text-md font-semibold text-gray-700 mb-2">🍽️ 餐點</h4>
+                        <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
+                          {Object.entries(getFoodSummary()).map(([itemName, quantity]) => (
+                            <div key={itemName} className="flex justify-between text-sm">
+                              <span className="text-gray-700">{itemName}</span>
+                              <span className="font-semibold text-gray-900">{quantity} 份</span>
+                            </div>
+                          ))}
+                          <div className="border-t pt-2 mt-2">
+                            <div className="flex justify-between font-bold text-sm">
+                              <span>餐點小計：</span>
+                              <span className="text-orange-600">{getFoodTotal()} 份</span>
+                            </div>
+                          </div>
                         </div>
-                      ))}
-                      <div className="border-t pt-2 mt-2">
-                        <div className="flex justify-between font-bold">
-                          <span>總計：</span>
-                          <span className="text-orange-600">{getTotalItems()} 份</span>
+                      </div>
+                    )}
+
+                    {/* 飲料統計 */}
+                    {getDrinkTotal() > 0 && (
+                      <div className="mb-4">
+                        <h4 className="text-md font-semibold text-gray-700 mb-2">🥤 飲料</h4>
+                        <div className="space-y-2 bg-blue-50 p-3 rounded-lg">
+                          {Object.entries(getDrinkSummary()).map(([itemName, quantity]) => (
+                            <div key={itemName} className="flex justify-between text-sm">
+                              <span className="text-gray-700">{itemName}</span>
+                              <span className="font-semibold text-gray-900">{quantity} 杯</span>
+                            </div>
+                          ))}
+                          <div className="border-t pt-2 mt-2">
+                            <div className="flex justify-between font-bold text-sm">
+                              <span>飲料小計：</span>
+                              <span className="text-blue-600">{getDrinkTotal()} 杯</span>
+                            </div>
+                          </div>
                         </div>
+                      </div>
+                    )}
+
+                    {/* 總計 */}
+                    <div className="bg-yellow-50 p-3 rounded-lg">
+                      <div className="flex justify-between font-bold">
+                        <span>總計：</span>
+                        <span className="text-red-600">
+                          {getFoodTotal() > 0 && `${getFoodTotal()} 份餐點`}
+                          {getFoodTotal() > 0 && getDrinkTotal() > 0 && ' + '}
+                          {getDrinkTotal() > 0 && `${getDrinkTotal()} 杯飲料`}
+                        </span>
                       </div>
                     </div>
                   </div>
