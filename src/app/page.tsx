@@ -90,6 +90,12 @@ export default function Home() {
       image: '/food/polkegg.jpg'
     },
     { 
+      id: 5, 
+      name: '雞蛋沙拉捲餅', 
+      price: 0,
+      image: '/food/taco.jpg'
+    },
+    { 
       id: 7, 
       name: '兒童餐', 
       price: 0, 
