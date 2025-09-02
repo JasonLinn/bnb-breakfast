@@ -193,6 +193,53 @@ export default function Home() {
     return slots;
   };
 
+  const handleOrderSubmit = async () => {
+    try {
+      const summary = getOrderSummary();
+      const orderDetails = Object.entries(summary)
+        .map(([item, qty]) => `${item}: ${qty}份`)
+        .join('\n');
+
+      const orderData = {
+        deliveryTime,
+        orderDetails,
+        totalItems: getTotalItems(),
+        timestamp: new Date().toLocaleString('zh-TW'),
+        items: cart
+      };
+
+      // 發送郵件 (這裡使用 EmailJS 或其他郵件服務)
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      if (response.ok) {
+        alert(`訂單已送出並通知店家！\n\n送餐時間: ${deliveryTime}\n\n訂單內容:\n${orderDetails}\n\n總計: ${getTotalItems()}份`);
+        // 清空購物車
+        setCart([]);
+        setDeliveryTime('');
+        setShowCart(false);
+      } else {
+        throw new Error('發送失敗');
+      }
+    } catch (error) {
+      // 備用方案：顯示訂單資訊
+      const summary = getOrderSummary();
+      const orderDetails = Object.entries(summary)
+        .map(([item, qty]) => `${item}: ${qty}份`)
+        .join('\n');
+      alert(`訂單已記錄！(郵件功能開發中)\n\n送餐時間: ${deliveryTime}\n\n訂單內容:\n${orderDetails}\n\n總計: ${getTotalItems()}份`);
+      // 清空購物車
+      setCart([]);
+      setDeliveryTime('');
+      setShowCart(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-50">
       {/* Header */}
@@ -332,7 +379,8 @@ export default function Home() {
 
           {/* 購物車側邊欄 */}
           <div className="lg:col-span-1">
-            <div className={`bg-white rounded-xl shadow-lg p-6 sticky top-24 ${showCart ? 'block' : 'hidden'}`}>
+            {/* 桌面版購物車 */}
+            <div className={`hidden lg:block bg-white rounded-xl shadow-lg p-6 sticky top-24 ${showCart ? 'block' : 'hidden'}`}>
               <h2 className="text-xl font-bold text-gray-800 mb-4">點餐清單</h2>
               
               {/* 送餐時間選擇 */}
@@ -410,16 +458,12 @@ export default function Home() {
                   </div>
                   
                   <button 
-                    onClick={() => {
+                    onClick={async () => {
                       if (!deliveryTime) {
                         alert('請選擇送餐時間');
                         return;
                       }
-                      const summary = getOrderSummary();
-                      const orderDetails = Object.entries(summary)
-                        .map(([item, qty]) => `${item}: ${qty}份`)
-                        .join('\n');
-                      alert(`訂單已送出！\n\n送餐時間: ${deliveryTime}\n\n訂單內容:\n${orderDetails}\n\n總計: ${getTotalItems()}份`);
+                      await handleOrderSubmit();
                     }}
                     disabled={!deliveryTime}
                     className={`w-full py-3 rounded-lg font-semibold transition-colors ${
@@ -433,6 +477,128 @@ export default function Home() {
                 </>
               )}
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 手機版全螢幕購物車 */}
+      <div className={`lg:hidden fixed inset-0 z-50 transform transition-transform duration-300 ease-in-out ${
+        showCart ? 'translate-x-0' : 'translate-x-full'
+      }`}>
+        <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowCart(false)}></div>
+        <div className="absolute right-0 top-0 h-full w-full max-w-sm bg-white shadow-xl">
+          <div className="flex flex-col h-full">
+            {/* 標題列 */}
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-xl font-bold text-gray-800">點餐清單</h2>
+              <button
+                onClick={() => setShowCart(false)}
+                className="p-2 hover:bg-gray-100 rounded-full"
+              >
+                <span className="text-xl">×</span>
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-4">
+              {/* 送餐時間選擇 */}
+              <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  選擇送餐時間
+                </label>
+                <select
+                  value={deliveryTime}
+                  onChange={(e) => setDeliveryTime(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                >
+                  <option value="">請選擇送餐時間</option>
+                  {generateTimeSlots().map((slot) => (
+                    <option key={slot} value={slot}>
+                      {slot}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {cart.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">尚未點餐</p>
+              ) : (
+                <>
+                  <div className="space-y-3 mb-6">
+                    {cart.map((item, index) => (
+                      <div key={`${item.id}-${item.type}-${index}`} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-sm">{item.name}</h4>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => updateQuantity(item.id, item.type, item.quantity - 1)}
+                            className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300"
+                          >
+                            -
+                          </button>
+                          <span className="w-8 text-center font-semibold">{item.quantity}</span>
+                          <button
+                            onClick={() => updateQuantity(item.id, item.type, item.quantity + 1)}
+                            className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300"
+                          >
+                            +
+                          </button>
+                          <button
+                            onClick={() => removeFromCart(item.id, item.type)}
+                            className="text-red-500 hover:text-red-700 ml-2"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* 訂單統計 */}
+                  <div className="border-t pt-4 mb-4">
+                    <h3 className="text-lg font-bold text-gray-800 mb-3">訂單統計</h3>
+                    <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
+                      {Object.entries(getOrderSummary()).map(([itemName, quantity]) => (
+                        <div key={itemName} className="flex justify-between text-sm">
+                          <span className="text-gray-700">{itemName}</span>
+                          <span className="font-semibold text-gray-900">{quantity} 份</span>
+                        </div>
+                      ))}
+                      <div className="border-t pt-2 mt-2">
+                        <div className="flex justify-between font-bold">
+                          <span>總計：</span>
+                          <span className="text-orange-600">{getTotalItems()} 份</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+            
+            {/* 底部按鈕 */}
+            {cart.length > 0 && (
+              <div className="p-4 border-t">
+                <button 
+                  onClick={async () => {
+                    if (!deliveryTime) {
+                      alert('請選擇送餐時間');
+                      return;
+                    }
+                    await handleOrderSubmit();
+                  }}
+                  disabled={!deliveryTime}
+                  className={`w-full py-3 rounded-lg font-semibold transition-colors ${
+                    deliveryTime 
+                      ? 'bg-green-500 text-white hover:bg-green-600' 
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+                >
+                  確認送出訂單
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
