@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'weiby-breakfast-store.weibyapps.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };
