@@ -382,7 +382,8 @@ export default function Home() {
                 <span className="text-2xl">🍳</span>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-800">衿日林民宿 x ToDo早午餐 線上點餐</h1>
+                <h1 className="text-xl font-bold text-gray-800">衿日林民宿 x Todo早餐 訂餐系統</h1>
+                <p className="text-sm text-gray-600 mt-1">線上點餐 • 新鮮現做 • 準時送達</p>
               </div>
             </div>
             <button
