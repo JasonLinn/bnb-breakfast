@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Image from "next/image";
+import Image from 'next/image';
+import toast, { Toaster } from 'react-hot-toast';
 
 interface MenuItem {
   id: number;
@@ -32,6 +33,8 @@ export default function Home() {
   const [cart, setCart] = useState<OrderItem[]>([]);
   const [showCart, setShowCart] = useState(false);
   const [deliveryTime, setDeliveryTime] = useState<string>('');
+  const [orderDate, setOrderDate] = useState<string>('');
+  const [orderNote, setOrderNote] = useState<string>('');
 
   const menuItems: MenuItem[] = [
     { 
@@ -39,19 +42,19 @@ export default function Home() {
       name: '早安拼盤', 
       price: 0, 
       description: '鮮奶吐司+起士火腿+炒蛋+生菜沙拉+地瓜',
-      image: 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?ixlib=rb-4.0.3&w=400&h=300&fit=crop'
+      image: 'https://weiby-breakfast-store.weibyapps.com/Weiby_Breakfast_Store_16175438314F4F17/1470320427EE4DCF_320_882_43.jpg'
     },
     { 
       id: 2, 
       name: '豬排起司蛋美式漢堡/鮮奶吐司', 
       price: 0,
-      image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&w=400&h=300&fit=crop'
+      image: 'https://weiby-breakfast-store.weibyapps.com/Weiby_Breakfast_Store_16175438314F4F17/1470320427EE4DCF_320_882_43.jpg'
     },
     { 
       id: 3, 
       name: '夏威夷嫩雞美式漢堡/鮮奶吐司', 
       price: 0,
-      image: 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?ixlib=rb-4.0.3&w=400&h=300&fit=crop'
+      image: 'https://weiby-breakfast-store.weibyapps.com/Weiby_…_16175438314F4F17/1470320427EE4DCF_320_904_43.jpg'
     },
     { 
       id: 4, 
@@ -194,6 +197,9 @@ export default function Home() {
   };
 
   const handleOrderSubmit = async () => {
+    // 顯示發送中的 Toast
+    const loadingToast = toast.loading('正在送出訂單...');
+    
     try {
       const summary = getOrderSummary();
       const orderDetails = Object.entries(summary)
@@ -202,13 +208,15 @@ export default function Home() {
 
       const orderData = {
         deliveryTime,
+        orderDate: orderDate || '未指定',
+        orderNote: orderNote || '無',
         orderDetails,
         totalItems: getTotalItems(),
         timestamp: new Date().toLocaleString('zh-TW'),
         items: cart
       };
 
-      // 發送郵件 (這裡使用 EmailJS 或其他郵件服務)
+      // 發送郵件
       const response = await fetch('/api/send-email', {
         method: 'POST',
         headers: {
@@ -219,26 +227,54 @@ export default function Home() {
 
       if (response.ok) {
         const responseData = await response.json();
-        alert(`✅ 訂單已送出並通知店家！\n\n送餐時間: ${deliveryTime}\n\n訂單內容:\n${orderDetails}\n\n總計: ${getTotalItems()}份\n\n${responseData.messageId ? `郵件 ID: ${responseData.messageId}` : ''}`);
-        // 清空購物車
+        
+        // 關閉載入中的 Toast 並顯示成功訊息
+        toast.dismiss(loadingToast);
+        toast.success(
+          `🎉 訂單已成功送出！\n送餐時間: ${deliveryTime}${orderDate ? `\n日期: ${orderDate}` : ''}\n總計: ${getTotalItems()}份`,
+          {
+            duration: 5000,
+            style: {
+              background: '#10B981',
+              color: '#fff',
+              fontWeight: 'bold',
+            },
+          }
+        );
+        
+        // 清空購物車和表單
         setCart([]);
         setDeliveryTime('');
+        setOrderDate('');
+        setOrderNote('');
         setShowCart(false);
       } else {
         const errorData = await response.json();
         throw new Error(errorData.message || '發送失敗');
       }
     } catch (error) {
-      // 備用方案：顯示訂單資訊
-      const summary = getOrderSummary();
-      const orderDetails = Object.entries(summary)
-        .map(([item, qty]) => `${item}: ${qty}份`)
-        .join('\n');
+      // 關閉載入中的 Toast
+      toast.dismiss(loadingToast);
+      
+      // 顯示錯誤 Toast
       const errorMessage = error instanceof Error ? error.message : '未知錯誤';
-      alert(`⚠️ 郵件發送失敗，但訂單已記錄\n\n錯誤: ${errorMessage}\n\n送餐時間: ${deliveryTime}\n\n訂單內容:\n${orderDetails}\n\n總計: ${getTotalItems()}份\n\n請手動聯繫店家確認訂單`);
-      // 清空購物車
+      toast.error(
+        `⚠️ 郵件發送失敗\n錯誤: ${errorMessage}\n請手動聯繫店家確認訂單`,
+        {
+          duration: 6000,
+          style: {
+            background: '#EF4444',
+            color: '#fff',
+            fontWeight: 'bold',
+          },
+        }
+      );
+      
+      // 依然清空購物車（訂單已記錄）
       setCart([]);
       setDeliveryTime('');
+      setOrderDate('');
+      setOrderNote('');
       setShowCart(false);
     }
   };
@@ -389,7 +425,7 @@ export default function Home() {
               {/* 送餐時間選擇 */}
               <div className="mb-6 p-4 bg-blue-50 rounded-lg">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  選擇送餐時間
+                  選擇送餐時間 *
                 </label>
                 <select
                   value={deliveryTime}
@@ -404,6 +440,38 @@ export default function Home() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              {/* 日期選擇 (選填) */}
+              <div className="mb-4 p-4 bg-yellow-50 rounded-lg">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  指定日期 (選填)
+                </label>
+                <input
+                  type="date"
+                  value={orderDate}
+                  onChange={(e) => setOrderDate(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+
+              {/* 備註欄位 (選填) */}
+              <div className="mb-6 p-4 bg-green-50 rounded-lg">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  備註 (選填)
+                </label>
+                <textarea
+                  value={orderNote}
+                  onChange={(e) => setOrderNote(e.target.value)}
+                  placeholder="特殊需求、過敏提醒等..."
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
+                  rows={3}
+                  maxLength={200}
+                />
+                <div className="text-xs text-gray-500 mt-1">
+                  {orderNote.length}/200
+                </div>
               </div>
 
               {cart.length === 0 ? (
@@ -506,7 +574,7 @@ export default function Home() {
               {/* 送餐時間選擇 */}
               <div className="mb-6 p-4 bg-blue-50 rounded-lg">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  選擇送餐時間
+                  選擇送餐時間 *
                 </label>
                 <select
                   value={deliveryTime}
@@ -521,6 +589,38 @@ export default function Home() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              {/* 日期選擇 (選填) */}
+              <div className="mb-4 p-4 bg-yellow-50 rounded-lg">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  指定日期 (選填)
+                </label>
+                <input
+                  type="date"
+                  value={orderDate}
+                  onChange={(e) => setOrderDate(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+
+              {/* 備註欄位 (選填) */}
+              <div className="mb-6 p-4 bg-green-50 rounded-lg">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  備註 (選填)
+                </label>
+                <textarea
+                  value={orderNote}
+                  onChange={(e) => setOrderNote(e.target.value)}
+                  placeholder="特殊需求、過敏提醒等..."
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
+                  rows={3}
+                  maxLength={200}
+                />
+                <div className="text-xs text-gray-500 mt-1">
+                  {orderNote.length}/200
+                </div>
               </div>
 
               {cart.length === 0 ? (
@@ -615,6 +715,27 @@ export default function Home() {
           🛒 {getTotalItems()}
         </button>
       </div>
+
+      {/* Toast 通知元件 */}
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+        gutter={8}
+        containerStyle={{
+          top: 20,
+        }}
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+            borderRadius: '10px',
+            padding: '16px',
+            fontSize: '14px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          },
+        }}
+      />
     </div>
   );
 }

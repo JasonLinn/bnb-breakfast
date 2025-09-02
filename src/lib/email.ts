@@ -19,6 +19,8 @@ const createTransporter = () => {
 export interface OrderData {
   timestamp: string;
   deliveryTime: string;
+  orderDate?: string;
+  orderNote?: string;
   orderDetails: string;
   totalItems: number;
   items: Array<{
@@ -60,6 +62,8 @@ export const sendOrderEmail = async (orderData: OrderData) => {
             <h3>📋 訂單資訊</h3>
             <p><strong>訂單時間:</strong> ${orderData.timestamp}</p>
             <p><strong>送餐時間:</strong> ${orderData.deliveryTime}</p>
+            ${orderData.orderDate && orderData.orderDate !== '未指定' ? `<p><strong>指定日期:</strong> ${orderData.orderDate}</p>` : ''}
+            ${orderData.orderNote && orderData.orderNote !== '無' ? `<p><strong>備註:</strong> ${orderData.orderNote}</p>` : ''}
             <p class="total"><strong>總計:</strong> ${orderData.totalItems} 份</p>
           </div>
 
@@ -96,6 +100,8 @@ export const sendOrderEmail = async (orderData: OrderData) => {
 
 訂單時間: ${orderData.timestamp}
 送餐時間: ${orderData.deliveryTime}
+${orderData.orderDate && orderData.orderDate !== '未指定' ? `指定日期: ${orderData.orderDate}` : ''}
+${orderData.orderNote && orderData.orderNote !== '無' ? `備註: ${orderData.orderNote}` : ''}
 
 訂單內容:
 ${orderData.orderDetails}
@@ -112,7 +118,7 @@ ${orderData.items.map(item => `${item.name}: ${item.quantity}份`).join('\n')}
     const mailOptions = {
       from: process.env.SMTP_FROM,
       to: process.env.SMTP_TO,
-      subject: `🍳 新訂單 - ${orderData.deliveryTime} 送餐 (${orderData.totalItems}份)`,
+      subject: `🍳 新訂單 - ${orderData.deliveryTime} 送餐${orderData.orderDate && orderData.orderDate !== '未指定' ? ` (${orderData.orderDate})` : ''} (${orderData.totalItems}份)`,
       text: textContent,
       html: htmlContent,
     };
