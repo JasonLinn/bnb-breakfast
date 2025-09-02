@@ -29,7 +29,6 @@ interface OrderItem {
 export default function Home() {
   const [cart, setCart] = useState<OrderItem[]>([]);
   const [showCart, setShowCart] = useState(false);
-  const [deliveryTime, setDeliveryTime] = useState<string>('');
 
   const menuItems: MenuItem[] = [
     { id: 1, name: '早安拼盤', price: 0, description: '鮮奶吐司+起士火腿+炒蛋+生菜沙拉+地瓜' },
@@ -50,7 +49,9 @@ export default function Home() {
   ];
 
   const addToCart = (item: MenuItem | DrinkItem, type?: 'ice' | 'hot' | 'no-ice') => {
-    const price = 0; // 不再需要價格計算
+    const price = 'icePrice' in item ? 
+      (type === 'ice' ? item.icePrice : type === 'hot' ? item.hotPrice : item.noIcePrice || 0) : 
+      item.price;
 
     const cartItem: OrderItem = {
       id: item.id,
@@ -96,30 +97,12 @@ export default function Home() {
     );
   };
 
+  const getTotalPrice = () => {
+    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
+
   const getTotalItems = () => {
     return cart.reduce((total, item) => total + item.quantity, 0);
-  };
-
-  const getOrderSummary = () => {
-    const summary: { [key: string]: number } = {};
-    cart.forEach(item => {
-      const itemName = item.name;
-      summary[itemName] = (summary[itemName] || 0) + item.quantity;
-    });
-    return summary;
-  };
-
-  const generateTimeSlots = () => {
-    const slots = [];
-    
-    // 早餐時段: 8:00-10:00
-    for (let hour = 8; hour <= 10; hour++) {
-      slots.push(`${hour}:00`);
-      if (hour < 10) {
-        slots.push(`${hour}:30`);
-      }
-    }
-    return slots;
   };
 
   return (
@@ -141,7 +124,7 @@ export default function Home() {
               onClick={() => setShowCart(!showCart)}
               className="relative bg-yellow-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-yellow-600 transition-colors"
             >
-              點餐清單 ({getTotalItems()})
+              購物車 ({getTotalItems()})
               {getTotalItems() > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center">
                   {getTotalItems()}
@@ -170,14 +153,14 @@ export default function Home() {
                       <p className="text-sm text-gray-600 mt-1">{item.description}</p>
                     )}
                     <div className="flex justify-between items-center mt-3">
-                      <span className="text-sm text-gray-500">
-                        數位點餐
+                      <span className="text-lg font-bold text-orange-600">
+                        {item.price === 0 ? '價格請洽詢' : `$${item.price}`}
                       </span>
                       <button
                         onClick={() => addToCart(item)}
                         className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
                       >
-                        點餐
+                        加入購物車
                       </button>
                     </div>
                   </div>
@@ -201,7 +184,9 @@ export default function Home() {
                           <div>
                             <h3 className="font-semibold text-lg text-gray-800">{drink.name}</h3>
                             <p className="text-sm text-gray-600">
-                              可選擇：冰 | 溫熱 | 去冰
+                              冰: {drink.icePrice === 0 ? '價格請洽詢' : `$${drink.icePrice}`} | 
+                              溫熱: {drink.hotPrice === 0 ? '價格請洽詢' : `$${drink.hotPrice}`}
+                              {drink.noIcePrice !== undefined && ` | 去冰: ${drink.noIcePrice === 0 ? '價格請洽詢' : `$${drink.noIcePrice}`}`}
                             </p>
                           </div>
                         </div>
@@ -238,37 +223,19 @@ export default function Home() {
           {/* 購物車側邊欄 */}
           <div className="lg:col-span-1">
             <div className={`bg-white rounded-xl shadow-lg p-6 sticky top-24 ${showCart ? 'block' : 'hidden lg:block'}`}>
-              <h2 className="text-xl font-bold text-gray-800 mb-4">點餐清單</h2>
-              
-              {/* 送餐時間選擇 */}
-              <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  選擇送餐時間
-                </label>
-                <select
-                  value={deliveryTime}
-                  onChange={(e) => setDeliveryTime(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  required
-                >
-                  <option value="">請選擇送餐時間</option>
-                  {generateTimeSlots().map((slot) => (
-                    <option key={slot} value={slot}>
-                      {slot}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
+              <h2 className="text-xl font-bold text-gray-800 mb-4">訂單詳情</h2>
               {cart.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">尚未點餐</p>
+                <p className="text-gray-500 text-center py-8">購物車是空的</p>
               ) : (
                 <>
-                  <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">
+                  <div className="space-y-3 mb-6 max-h-96 overflow-y-auto">
                     {cart.map((item, index) => (
                       <div key={`${item.id}-${item.type}-${index}`} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
                         <div className="flex-1">
                           <h4 className="font-medium text-sm">{item.name}</h4>
+                          <p className="text-sm text-gray-600">
+                            {item.price === 0 ? '價格請洽詢' : `$${item.price}`}
+                          </p>
                         </div>
                         <div className="flex items-center space-x-2">
                           <button
@@ -277,7 +244,7 @@ export default function Home() {
                           >
                             -
                           </button>
-                          <span className="w-8 text-center font-semibold">{item.quantity}</span>
+                          <span className="w-8 text-center">{item.quantity}</span>
                           <button
                             onClick={() => updateQuantity(item.id, item.type, item.quantity + 1)}
                             className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300"
@@ -294,47 +261,17 @@ export default function Home() {
                       </div>
                     ))}
                   </div>
-                  
-                  {/* 訂單統計 */}
-                  <div className="border-t pt-4 mb-4">
-                    <h3 className="text-lg font-bold text-gray-800 mb-3">訂單統計</h3>
-                    <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
-                      {Object.entries(getOrderSummary()).map(([itemName, quantity]) => (
-                        <div key={itemName} className="flex justify-between text-sm">
-                          <span className="text-gray-700">{itemName}</span>
-                          <span className="font-semibold text-gray-900">{quantity} 份</span>
-                        </div>
-                      ))}
-                      <div className="border-t pt-2 mt-2">
-                        <div className="flex justify-between font-bold">
-                          <span>總計：</span>
-                          <span className="text-orange-600">{getTotalItems()} 份</span>
-                        </div>
-                      </div>
+                  <div className="border-t pt-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-lg font-bold">總計:</span>
+                      <span className="text-xl font-bold text-orange-600">
+                        {getTotalPrice() === 0 ? '價格請洽詢' : `$${getTotalPrice()}`}
+                      </span>
                     </div>
+                    <button className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors">
+                      確認訂單
+                    </button>
                   </div>
-                  
-                  <button 
-                    onClick={() => {
-                      if (!deliveryTime) {
-                        alert('請選擇送餐時間');
-                        return;
-                      }
-                      const summary = getOrderSummary();
-                      const orderDetails = Object.entries(summary)
-                        .map(([item, qty]) => `${item}: ${qty}份`)
-                        .join('\n');
-                      alert(`訂單已送出！\n\n送餐時間: ${deliveryTime}\n\n訂單內容:\n${orderDetails}\n\n總計: ${getTotalItems()}份`);
-                    }}
-                    disabled={!deliveryTime}
-                    className={`w-full py-3 rounded-lg font-semibold transition-colors ${
-                      deliveryTime 
-                        ? 'bg-green-500 text-white hover:bg-green-600' 
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    }`}
-                  >
-                    確認送出訂單
-                  </button>
                 </>
               )}
             </div>
