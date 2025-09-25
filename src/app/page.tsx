@@ -725,11 +725,15 @@ export default function Home() {
                   <button 
                     onClick={async () => {
                       if (!roomNumber) {
-                        alert('請輸入房號');
+                        toast.error('📍 請輸入房號，我們需要知道要送到哪一間房間！', {
+                          duration: 4000,
+                        });
                         return;
                       }
                       if (!deliveryTime) {
-                        alert('請選擇送餐時間');
+                        toast.error('⏰ 請選擇送餐時間，讓我們安排最佳的送餐時段！', {
+                          duration: 4000,
+                        });
                         return;
                       }
                       await handleOrderSubmit();
@@ -741,7 +745,7 @@ export default function Home() {
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
                   >
-                    確認送出訂單
+                    {!roomNumber ? '📍 請先填寫房號' : !deliveryTime ? '⏰ 請選擇送餐時間' : '確認送出訂單'}
                   </button>
                 </>
               )}
@@ -943,11 +947,15 @@ export default function Home() {
                 <button 
                   onClick={async () => {
                     if (!roomNumber) {
-                      alert('請輸入房號');
+                      toast.error('📍 請輸入房號，我們需要知道要送到哪一間房間！', {
+                        duration: 4000,
+                      });
                       return;
                     }
                     if (!deliveryTime) {
-                      alert('請選擇送餐時間');
+                      toast.error('⏰ 請選擇送餐時間，讓我們安排最佳的送餐時段！', {
+                        duration: 4000,
+                      });
                       return;
                     }
                     await handleOrderSubmit();
@@ -959,7 +967,7 @@ export default function Home() {
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                 >
-                  確認送出訂單
+                  {!roomNumber ? '📍 請先填寫房號' : !deliveryTime ? '⏰ 請選擇送餐時間' : '確認送出訂單'}
                 </button>
               </div>
             )}
