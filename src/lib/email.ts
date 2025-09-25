@@ -18,6 +18,7 @@ const createTransporter = () => {
 
 export interface OrderData {
   timestamp: string;
+  roomNumber?: string;
   deliveryTime: string;
   orderDate?: string;
   orderNote?: string;
@@ -61,6 +62,7 @@ export const sendOrderEmail = async (orderData: OrderData) => {
           <div class="order-info">
             <h3>📋 訂單資訊</h3>
             <p><strong>訂單時間:</strong> ${orderData.timestamp}</p>
+            ${orderData.roomNumber && orderData.roomNumber !== '未填寫' ? `<p><strong>📍 房號:</strong> ${orderData.roomNumber}</p>` : ''}
             <p><strong>送餐時間:</strong> ${orderData.deliveryTime}</p>
             ${orderData.orderDate && orderData.orderDate !== '未指定' ? `<p><strong>指定日期:</strong> ${orderData.orderDate}</p>` : ''}
             ${orderData.orderNote && orderData.orderNote !== '無' ? `<p><strong>備註:</strong> ${orderData.orderNote}</p>` : ''}
@@ -99,6 +101,7 @@ export const sendOrderEmail = async (orderData: OrderData) => {
 新的早餐訂單 - ToDo早午餐 利澤店
 
 訂單時間: ${orderData.timestamp}
+${orderData.roomNumber && orderData.roomNumber !== '未填寫' ? `📍 房號: ${orderData.roomNumber}` : ''}
 送餐時間: ${orderData.deliveryTime}
 ${orderData.orderDate && orderData.orderDate !== '未指定' ? `指定日期: ${orderData.orderDate}` : ''}
 ${orderData.orderNote && orderData.orderNote !== '無' ? `備註: ${orderData.orderNote}` : ''}
@@ -118,7 +121,7 @@ ${orderData.items.map(item => `${item.name}: ${item.quantity}份`).join('\n')}
     const mailOptions = {
       from: process.env.SMTP_FROM,
       to: process.env.SMTP_TO,
-      subject: `🍳 新訂單 - ${orderData.deliveryTime} 送餐${orderData.orderDate && orderData.orderDate !== '未指定' ? ` (${orderData.orderDate})` : ''} (${orderData.totalItems}份)`,
+      subject: `🍳 新訂單${orderData.roomNumber && orderData.roomNumber !== '未填寫' ? ` - 房號${orderData.roomNumber}` : ''} - ${orderData.deliveryTime}送餐${orderData.orderDate && orderData.orderDate !== '未指定' ? ` (${orderData.orderDate})` : ''} (${orderData.totalItems}份)`,
       text: textContent,
       html: htmlContent,
     };

@@ -43,6 +43,7 @@ export default function Home() {
   const [deliveryTime, setDeliveryTime] = useState<string>('');
   const [orderDate, setOrderDate] = useState<string>('');
   const [orderNote, setOrderNote] = useState<string>('');
+  const [roomNumber, setRoomNumber] = useState<string>('');
   const [selectedOptions, setSelectedOptions] = useState<{[key: number]: string}>({});
 
   const menuItems: MenuItem[] = [
@@ -90,7 +91,7 @@ export default function Home() {
       image: '/food/polkegg.jpg'
     },
     { 
-      id: 5, 
+      id: 6, 
       name: '雞蛋沙拉捲餅', 
       price: 0,
       image: '/food/taco.jpg'
@@ -298,6 +299,7 @@ export default function Home() {
         .join('\n');
 
       const orderData = {
+        roomNumber: roomNumber || '未填寫',
         deliveryTime,
         orderDate: orderDate || '未指定',
         orderNote: orderNote || '無',
@@ -322,7 +324,7 @@ export default function Home() {
         // 關閉載入中的 Toast 並顯示成功訊息
         toast.dismiss(loadingToast);
         toast.success(
-          `🎉 訂單已成功送出！\n送餐時間: ${deliveryTime}${orderDate ? `\n日期: ${orderDate}` : ''}\n總計: ${getTotalItems()}份`,
+          `🎉 訂單已成功送出！\n${roomNumber ? `房號: ${roomNumber}\n` : ''}送餐時間: ${deliveryTime}${orderDate ? `\n日期: ${orderDate}` : ''}\n總計: ${getTotalItems()}份`,
           {
             duration: 5000,
             style: {
@@ -338,6 +340,7 @@ export default function Home() {
         setDeliveryTime('');
         setOrderDate('');
         setOrderNote('');
+        setRoomNumber('');
         setShowCart(false);
       } else {
         const errorData = await response.json();
@@ -366,6 +369,7 @@ export default function Home() {
       setDeliveryTime('');
       setOrderDate('');
       setOrderNote('');
+      setRoomNumber('');
       setShowCart(false);
     }
   };
@@ -538,15 +542,42 @@ export default function Home() {
             <div className={`hidden lg:block bg-white rounded-xl shadow-lg p-6 sticky top-24 ${showCart ? 'block' : 'hidden'}`}>
               <h2 className="text-xl font-bold text-gray-800 mb-4">點餐清單</h2>
               
-              {/* 送餐時間選擇 */}
-              <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+              {/* 房號輸入 */}
+              <div className="mb-6 p-4 bg-red-50 rounded-lg border-2 border-red-200">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  選擇送餐時間 *
+                  點餐房號 📍 <span className="text-red-500 font-bold">*必填</span>
+                </label>
+                <input
+                  type="text"
+                  value={roomNumber}
+                  onChange={(e) => setRoomNumber(e.target.value)}
+                  placeholder="請輸入房間號碼"
+                  className={`w-full p-2 border-2 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 ${
+                    roomNumber ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'
+                  }`}
+                  maxLength={10}
+                  required
+                />
+                <div className="text-xs mt-1">
+                  {roomNumber ? (
+                    <span className="text-green-600">✅ 房號已填寫</span>
+                  ) : (
+                    <span className="text-red-500">⚠️ 請務必填寫房號，方便我們為您送餐</span>
+                  )}
+                </div>
+              </div>
+
+              {/* 送餐時間選擇 */}
+              <div className="mb-6 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  選擇送餐時間 ⏰ <span className="text-red-500 font-bold">*必填</span>
                 </label>
                 <select
                   value={deliveryTime}
                   onChange={(e) => setDeliveryTime(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className={`w-full p-2 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    deliveryTime ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'
+                  }`}
                   required
                 >
                   <option value="">請選擇送餐時間</option>
@@ -556,6 +587,13 @@ export default function Home() {
                     </option>
                   ))}
                 </select>
+                <div className="text-xs mt-1">
+                  {deliveryTime ? (
+                    <span className="text-green-600">✅ 送餐時間已選擇</span>
+                  ) : (
+                    <span className="text-red-500">⚠️ 請選擇送餐時間</span>
+                  )}
+                </div>
               </div>
 
               {/* 日期選擇 (選填) */}
@@ -686,15 +724,19 @@ export default function Home() {
                   
                   <button 
                     onClick={async () => {
+                      if (!roomNumber) {
+                        alert('請輸入房號');
+                        return;
+                      }
                       if (!deliveryTime) {
                         alert('請選擇送餐時間');
                         return;
                       }
                       await handleOrderSubmit();
                     }}
-                    disabled={!deliveryTime}
+                    disabled={!roomNumber || !deliveryTime}
                     className={`w-full py-3 rounded-lg font-semibold transition-colors ${
-                      deliveryTime 
+                      roomNumber && deliveryTime 
                         ? 'bg-green-500 text-white hover:bg-green-600' 
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
@@ -727,6 +769,25 @@ export default function Home() {
             </div>
             
             <div className="flex-1 overflow-y-auto p-4">
+              {/* 房號輸入 */}
+              <div className="mb-6 p-4 bg-red-50 rounded-lg">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  點餐房號 📍 *
+                </label>
+                <input
+                  type="text"
+                  value={roomNumber}
+                  onChange={(e) => setRoomNumber(e.target.value)}
+                  placeholder="請輸入房間號碼"
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  maxLength={10}
+                  required
+                />
+                <div className="text-xs text-gray-500 mt-1">
+                  方便我們為您送餐
+                </div>
+              </div>
+
               {/* 送餐時間選擇 */}
               <div className="mb-6 p-4 bg-blue-50 rounded-lg">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -881,15 +942,19 @@ export default function Home() {
               <div className="p-4 border-t">
                 <button 
                   onClick={async () => {
+                    if (!roomNumber) {
+                      alert('請輸入房號');
+                      return;
+                    }
                     if (!deliveryTime) {
                       alert('請選擇送餐時間');
                       return;
                     }
                     await handleOrderSubmit();
                   }}
-                  disabled={!deliveryTime}
+                  disabled={!roomNumber || !deliveryTime}
                   className={`w-full py-3 rounded-lg font-semibold transition-colors ${
-                    deliveryTime 
+                    roomNumber && deliveryTime 
                       ? 'bg-green-500 text-white hover:bg-green-600' 
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
