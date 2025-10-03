@@ -22,7 +22,18 @@ export interface OrderData {
   deliveryTime: string;
   orderDate?: string;
   orderNote?: string;
-  orderDetails: string;
+  foodItems: Array<{
+    name: string;
+    quantity: number;
+    type?: string;
+  }>;
+  drinkItems: Array<{
+    name: string;
+    quantity: number;
+    type?: string;
+  }>;
+  foodTotal: number;
+  drinkTotal: number;
   totalItems: number;
   items: Array<{
     name: string;
@@ -70,6 +81,26 @@ export const sendOrderEmail = async (orderData: OrderData) => {
           </div>
 
           <h3>🍽️ 訂單明細</h3>
+          
+          <div style="background-color: #f0f9ff; border: 2px solid #3b82f6; border-radius: 8px; padding: 15px; margin: 15px 0;">
+            <p style="margin: 0; font-weight: bold; color: #1e40af; font-size: 16px;">
+              📋 快速複製區域 ${orderData.roomNumber && orderData.roomNumber !== '未填寫' ? `- 房號: ${orderData.roomNumber}` : ''} - ${orderData.deliveryTime}送餐
+            </p>
+            <div style="background-color: white; padding: 12px; margin-top: 10px; border-radius: 4px; font-family: monospace; white-space: pre-line;">
+${orderData.foodItems && orderData.foodItems.length > 0 ? `【主餐】
+${orderData.foodItems.map(item => `${item.name}: ${item.quantity}份`).join('\n')}
+主餐小計: ${orderData.foodTotal} 份
+
+` : ''}${orderData.drinkItems && orderData.drinkItems.length > 0 ? `【飲料】
+${orderData.drinkItems.map(item => `${item.name}: ${item.quantity}杯`).join('\n')}
+飲料小計: ${orderData.drinkTotal} 杯
+
+` : ''}總計: ${orderData.foodTotal > 0 ? `${orderData.foodTotal}份餐` : ''}${orderData.foodTotal > 0 && orderData.drinkTotal > 0 ? ' + ' : ''}${orderData.drinkTotal > 0 ? `${orderData.drinkTotal}杯飲料` : ''} (共${orderData.totalItems}項)
+            </div>
+          </div>
+          
+          ${orderData.foodItems && orderData.foodItems.length > 0 ? `
+          <h4 style="color: #f59e0b; margin-top: 20px;">主餐</h4>
           <table class="items-table">
             <thead>
               <tr>
@@ -78,14 +109,54 @@ export const sendOrderEmail = async (orderData: OrderData) => {
               </tr>
             </thead>
             <tbody>
-              ${orderData.items.map(item => `
+              ${orderData.foodItems.map(item => `
                 <tr>
                   <td>${item.name}</td>
                   <td>${item.quantity} 份</td>
                 </tr>
               `).join('')}
+              <tr style="background-color: #fff3cd; font-weight: bold;">
+                <td>主餐小計</td>
+                <td>${orderData.foodTotal} 份</td>
+              </tr>
             </tbody>
           </table>
+          ` : ''}
+          
+          ${orderData.drinkItems && orderData.drinkItems.length > 0 ? `
+          <h4 style="color: #3b82f6; margin-top: 20px;">飲料</h4>
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>品項</th>
+                <th>數量</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${orderData.drinkItems.map(item => `
+                <tr>
+                  <td>${item.name}</td>
+                  <td>${item.quantity} 杯</td>
+                </tr>
+              `).join('')}
+              <tr style="background-color: #dbeafe; font-weight: bold;">
+                <td>飲料小計</td>
+                <td>${orderData.drinkTotal} 杯</td>
+              </tr>
+            </tbody>
+          </table>
+          ` : ''}
+          
+          <div class="order-info" style="background-color: #fef3c7; margin-top: 20px;">
+            <h4 style="color: #f59e0b; margin: 0;">📊 總計</h4>
+            <p style="font-size: 18px; font-weight: bold; margin: 10px 0;">
+              ${orderData.foodTotal > 0 ? `主餐: ${orderData.foodTotal} 份` : ''}
+              ${orderData.foodTotal > 0 && orderData.drinkTotal > 0 ? ' + ' : ''}
+              ${orderData.drinkTotal > 0 ? `飲料: ${orderData.drinkTotal} 杯` : ''}
+              <br>
+              <span style="color: #dc2626;">總共: ${orderData.totalItems} 項</span>
+            </p>
+          </div>
 
           <div class="footer">
             <p>此郵件由 ToDo早午餐訂單系統 自動發送</p>
@@ -106,13 +177,27 @@ ${orderData.roomNumber && orderData.roomNumber !== '未填寫' ? `📍 房號: $
 ${orderData.orderDate && orderData.orderDate !== '未指定' ? `指定日期: ${orderData.orderDate}` : ''}
 ${orderData.orderNote && orderData.orderNote !== '無' ? `備註: ${orderData.orderNote}` : ''}
 
-訂單內容:
-${orderData.orderDetails}
+========================================
+訂單明細 ${orderData.roomNumber && orderData.roomNumber !== '未填寫' ? `- 房號: ${orderData.roomNumber}` : ''} - ${orderData.deliveryTime}送餐
+========================================
 
-總計: ${orderData.totalItems}份
+${orderData.foodItems && orderData.foodItems.length > 0 ? `【主餐】
+${orderData.foodItems.map(item => `${item.name}: ${item.quantity}份`).join('\n')}
+----------------------------------------
+主餐小計: ${orderData.foodTotal} 份
 
-詳細品項:
-${orderData.items.map(item => `${item.name}: ${item.quantity}份`).join('\n')}
+` : ''}${orderData.drinkItems && orderData.drinkItems.length > 0 ? `【飲料】
+${orderData.drinkItems.map(item => `${item.name}: ${item.quantity}杯`).join('\n')}
+----------------------------------------
+飲料小計: ${orderData.drinkTotal} 杯
+
+` : ''}========================================
+【總計】
+${orderData.foodTotal > 0 ? `主餐: ${orderData.foodTotal} 份` : ''}
+${orderData.foodTotal > 0 && orderData.drinkTotal > 0 ? ' + ' : ''}
+${orderData.drinkTotal > 0 ? `飲料: ${orderData.drinkTotal} 杯` : ''}
+總共: ${orderData.totalItems} 項
+========================================
 
 ---
 此郵件由 ToDo早午餐訂單系統 自動發送
@@ -121,7 +206,7 @@ ${orderData.items.map(item => `${item.name}: ${item.quantity}份`).join('\n')}
     const mailOptions = {
       from: process.env.SMTP_FROM,
       to: process.env.SMTP_TO,
-      subject: `🍳 新訂單${orderData.roomNumber && orderData.roomNumber !== '未填寫' ? ` - 房號${orderData.roomNumber}` : ''} - ${orderData.deliveryTime}送餐${orderData.orderDate && orderData.orderDate !== '未指定' ? ` (${orderData.orderDate})` : ''} (${orderData.totalItems}份)`,
+      subject: `🍳 新訂單${orderData.roomNumber && orderData.roomNumber !== '未填寫' ? ` - 房號${orderData.roomNumber}` : ''} - ${orderData.deliveryTime}送餐${orderData.orderDate && orderData.orderDate !== '未指定' ? ` (${orderData.orderDate})` : ''} (${orderData.foodTotal > 0 ? `${orderData.foodTotal}份餐` : ''}${orderData.foodTotal > 0 && orderData.drinkTotal > 0 ? '+' : ''}${orderData.drinkTotal > 0 ? `${orderData.drinkTotal}杯飲料` : ''})`,
       text: textContent,
       html: htmlContent,
     };

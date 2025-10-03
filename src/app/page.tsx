@@ -395,9 +395,15 @@ export default function Home() {
     const loadingToast = toast.loading('正在送出訂單...');
     
     try {
-      const summary = getOrderSummary();
-      const orderDetails = Object.entries(summary)
+      const foodSummary = getFoodSummary();
+      const drinkSummary = getDrinkSummary();
+      
+      const foodDetails = Object.entries(foodSummary)
         .map(([item, qty]) => `${item}: ${qty}份`)
+        .join('\n');
+      
+      const drinkDetails = Object.entries(drinkSummary)
+        .map(([item, qty]) => `${item}: ${qty}杯`)
         .join('\n');
 
       const orderData = {
@@ -405,7 +411,10 @@ export default function Home() {
         deliveryTime,
         orderDate: orderDate || '未指定',
         orderNote: orderNote || '無',
-        orderDetails,
+        foodItems: getFoodItems(),
+        drinkItems: getDrinkItems(),
+        foodTotal: getFoodTotal(),
+        drinkTotal: getDrinkTotal(),
         totalItems: getTotalItems(),
         timestamp: new Date().toLocaleString('zh-TW'),
         items: cart
@@ -425,8 +434,11 @@ export default function Home() {
         
         // 關閉載入中的 Toast 並顯示成功訊息
         toast.dismiss(loadingToast);
+        
+        const successMessage = `🎉 訂單已成功送出！\n${roomNumber ? `房號: ${roomNumber}\n` : ''}送餐時間: ${deliveryTime}${orderDate ? `\n日期: ${orderDate}` : ''}\n${getFoodTotal() > 0 ? `主餐: ${getFoodTotal()}份` : ''}${getFoodTotal() > 0 && getDrinkTotal() > 0 ? '\n' : ''}${getDrinkTotal() > 0 ? `飲料: ${getDrinkTotal()}杯` : ''}\n總計: ${getTotalItems()}項`;
+        
         toast.success(
-          `🎉 訂單已成功送出！\n${roomNumber ? `房號: ${roomNumber}\n` : ''}送餐時間: ${deliveryTime}${orderDate ? `\n日期: ${orderDate}` : ''}\n總計: ${getTotalItems()}份`,
+          successMessage,
           {
             duration: 5000,
             style: {
@@ -443,6 +455,11 @@ export default function Home() {
         setOrderDate('');
         setOrderNote('');
         setRoomNumber('');
+        localStorage.removeItem('breakfastCart');
+        localStorage.removeItem('deliveryTime');
+        localStorage.removeItem('orderDate');
+        localStorage.removeItem('orderNote');
+        localStorage.removeItem('roomNumber');
         setShowCart(false);
       } else {
         const errorData = await response.json();
