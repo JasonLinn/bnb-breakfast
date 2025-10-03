@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -45,6 +45,63 @@ export default function Home() {
   const [orderNote, setOrderNote] = useState<string>('');
   const [roomNumber, setRoomNumber] = useState<string>('');
   const [selectedOptions, setSelectedOptions] = useState<{[key: number]: string}>({});
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // 從 localStorage 載入購物車資料
+  useEffect(() => {
+    try {
+      const savedCart = localStorage.getItem('breakfastCart');
+      const savedDeliveryTime = localStorage.getItem('deliveryTime');
+      const savedOrderDate = localStorage.getItem('orderDate');
+      const savedOrderNote = localStorage.getItem('orderNote');
+      const savedRoomNumber = localStorage.getItem('roomNumber');
+      
+      if (savedCart) {
+        setCart(JSON.parse(savedCart));
+      }
+      if (savedDeliveryTime) {
+        setDeliveryTime(savedDeliveryTime);
+      }
+      if (savedOrderDate) {
+        setOrderDate(savedOrderDate);
+      }
+      if (savedOrderNote) {
+        setOrderNote(savedOrderNote);
+      }
+      if (savedRoomNumber) {
+        setRoomNumber(savedRoomNumber);
+      }
+    } catch (error) {
+      console.error('載入購物車資料失敗:', error);
+    } finally {
+      setIsLoaded(true);
+    }
+  }, []);
+
+  // 儲存購物車資料到 localStorage
+  useEffect(() => {
+    if (isLoaded) {
+      try {
+        localStorage.setItem('breakfastCart', JSON.stringify(cart));
+      } catch (error) {
+        console.error('儲存購物車資料失敗:', error);
+      }
+    }
+  }, [cart, isLoaded]);
+
+  // 儲存其他表單資料到 localStorage
+  useEffect(() => {
+    if (isLoaded) {
+      try {
+        localStorage.setItem('deliveryTime', deliveryTime);
+        localStorage.setItem('orderDate', orderDate);
+        localStorage.setItem('orderNote', orderNote);
+        localStorage.setItem('roomNumber', roomNumber);
+      } catch (error) {
+        console.error('儲存表單資料失敗:', error);
+      }
+    }
+  }, [deliveryTime, orderDate, orderNote, roomNumber, isLoaded]);
 
   const menuItems: MenuItem[] = [
     { 
@@ -226,6 +283,51 @@ export default function Home() {
           : item
       )
     );
+  };
+
+  const clearCart = () => {
+    if (cart.length === 0) {
+      toast.error('購物車已經是空的了！');
+      return;
+    }
+
+    toast((t) => (
+      <div className="flex flex-col gap-3">
+        <div className="font-semibold">確認要清除購物車嗎？</div>
+        <div className="text-sm text-gray-600">
+          將會清除 {getTotalItems()} 項商品
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              setCart([]);
+              setDeliveryTime('');
+              setOrderDate('');
+              setOrderNote('');
+              setRoomNumber('');
+              localStorage.removeItem('breakfastCart');
+              localStorage.removeItem('deliveryTime');
+              localStorage.removeItem('orderDate');
+              localStorage.removeItem('orderNote');
+              localStorage.removeItem('roomNumber');
+              toast.success('購物車已清除！', { id: t.id });
+            }}
+            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+          >
+            確認清除
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+          >
+            取消
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: 10000,
+      position: 'top-center',
+    });
   };
 
   const getTotalItems = () => {
@@ -540,7 +642,18 @@ export default function Home() {
           <div className="lg:col-span-1">
             {/* 桌面版購物車 */}
             <div className={`hidden lg:block bg-white rounded-xl shadow-lg p-6 sticky top-24 ${showCart ? 'block' : 'hidden'}`}>
-              <h2 className="text-xl font-bold text-gray-800 mb-4">點餐清單</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-800">點餐清單</h2>
+                {cart.length > 0 && (
+                  <button
+                    onClick={clearCart}
+                    className="px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    title="清除購物車"
+                  >
+                    🗑️ 清空
+                  </button>
+                )}
+              </div>
               
               {/* 房號輸入 */}
               <div className="mb-6 p-4 bg-red-50 rounded-lg border-2 border-red-200">
@@ -764,12 +877,23 @@ export default function Home() {
             {/* 標題列 */}
             <div className="flex items-center justify-between p-4 border-b">
               <h2 className="text-xl font-bold text-gray-800">點餐清單</h2>
-              <button
-                onClick={() => setShowCart(false)}
-                className="p-2 hover:bg-gray-100 rounded-full"
-              >
-                <span className="text-xl">×</span>
-              </button>
+              <div className="flex gap-2">
+                {cart.length > 0 && (
+                  <button
+                    onClick={clearCart}
+                    className="px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    title="清除購物車"
+                  >
+                    🗑️ 清空
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowCart(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full"
+                >
+                  <span className="text-xl">×</span>
+                </button>
+              </div>
             </div>
             
             <div className="flex-1 overflow-y-auto p-4">
